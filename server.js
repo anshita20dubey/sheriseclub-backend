@@ -9,10 +9,6 @@ dotenv.config();
 const app = express();
 const port = process.env.PORT || 5000;
 
-// Middleware
-app.use(cors());
-app.use(express.json());
-
 const allowedOrigins =
   process.env.NODE_ENV === "production"
     ? ["https://sherise.club", "https://www.sherise.club"]
@@ -26,6 +22,9 @@ app.use(
     credentials: true,
   })
 );
+// Middleware
+app.use(cors());
+app.use(express.json());
 
 // MongoDB Connection
 mongoose
