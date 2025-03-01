@@ -3,7 +3,8 @@ const mongoose = require("mongoose");
 const cors = require("cors");
 const dotenv = require("dotenv");
 const formRoutes = require("./routes/formRoutes");
-
+const https = require("https");
+var createError = require("http-errors");
 dotenv.config();
 
 const app = express();
@@ -43,6 +44,47 @@ mongoose
 app.use("/api", formRoutes);
 
 // Start the server
-app.listen(port, () => {
-  console.log(`Server is running on port ${port}`);
+// ✅ 404 Error Handling
+app.use((req, res, next) => {
+  next(createError(404));
 });
+
+// ✅ Global Error Handler
+app.use((err, req, res, next) => {
+  console.error("Error:", err.message);
+  res.status(err.status || 500).json({
+    success: false,
+    message: err.message || "Internal Server Error",
+  });
+});
+
+// ✅ HTTPS Setup (Production Only)
+if (process.env.NODE_ENV === "production") {
+  const SSL_KEY_PATH = "/etc/letsencrypt/live/sherise.club/privkey.pem";
+  const SSL_CERT_PATH = "/etc/letsencrypt/live/sherise.club/fullchain.pem";
+
+  if (fs.existsSync(SSL_KEY_PATH) && fs.existsSync(SSL_CERT_PATH)) {
+    const httpsOptions = {
+      key: fs.readFileSync(SSL_KEY_PATH),
+      cert: fs.readFileSync(SSL_CERT_PATH),
+    };
+
+    const PORT = process.env.PORT || 5000;
+    const HOST = "0.0.0.0";
+
+    https.createServer(httpsOptions, app).listen(PORT, HOST, () => {
+      console.log(`✅ Server is running securely on https://${HOST}:${PORT}`);
+    });
+  } else {
+    console.error("❌ SSL certificates not found. Please check your paths.");
+    process.exit(1);
+  }
+} else {
+  // ✅ Fallback to HTTP for Development
+  const PORT = process.env.PORT || 5000;
+  const HOST = "0.0.0.0";
+
+  app.listen(PORT, HOST, () => {
+    console.log(`✅ Server is running on http://${HOST}:${PORT}`);
+  });
+}
