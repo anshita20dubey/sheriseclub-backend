@@ -7,7 +7,8 @@ const https = require("https");
 const fs = require("fs");
 var createError = require("http-errors");
 dotenv.config();
-
+const authRoutes = require("./routes/auth");
+const leadRoutes = require("./routes/leads");
 const app = express();
 const port = process.env.PORT || 5000;
 
@@ -28,6 +29,7 @@ app.use(
 app.use(cors());
 app.use(express.json());
 
+
 // MongoDB Connection
 mongoose
   .connect(process.env.MONGODB_URI, {
@@ -43,6 +45,8 @@ mongoose
 
 // Routes
 app.use("/api", formRoutes);
+app.use("/api/auth", authRoutes);
+app.use("/api/leads", leadRoutes);
 
 // Start the server
 // ✅ 404 Error Handling
