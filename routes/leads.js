@@ -1,11 +1,21 @@
 const express = require("express");
 const router = express.Router();
-const Lead = require("../models/Lead");
 const auth = require("../middleware/auth");
+const leadsController = require("../controllers/leadsController");
 
-router.get("/", auth, async (req, res) => {
-  const leads = await Lead.find().sort({ createdAt: -1 });
-  res.json(leads);
-});
+// Get all leads
+router.get("/", auth, leadsController.getLeads);
+
+// Get single lead
+router.get("/:id", auth, leadsController.getLeadById);
+
+// Create lead (public)
+router.post("/", leadsController.createLead);
+
+// Update lead
+router.put("/:id", auth, leadsController.updateLead);
+
+// Delete lead
+router.delete("/:id", auth, leadsController.deleteLead);
 
 module.exports = router;

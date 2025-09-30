@@ -9,6 +9,10 @@ var createError = require("http-errors");
 dotenv.config();
 const authRoutes = require("./routes/auth");
 const leadRoutes = require("./routes/leads");
+const operatorRoutes = require("./routes/operator");
+const enablerRoutes = require("./routes/enabler");
+const adminRoutes = require("./routes/admin");
+const caseController = require("./controllers/caseController");
 const app = express();
 const port = process.env.PORT || 5000;
 
@@ -29,8 +33,8 @@ app.use(
 app.use(cors());
 app.use(express.json());
 
-
 // MongoDB Connection
+const connectDB = require("./config/db");
 mongoose
   .connect(process.env.MONGODB_URI, {
     useNewUrlParser: true,
@@ -44,10 +48,13 @@ mongoose
   });
 
 // Routes
-app.use("/api", formRoutes);
-app.use("/api/auth", authRoutes);
-app.use("/api/leads", leadRoutes);
+app.post("/api/help", caseController.createCase);
 
+app.use("/api/auth", authRoutes);
+app.use("/api/operator", operatorRoutes);
+app.use("/api/enabler", enablerRoutes);
+app.use("/api/admin", adminRoutes);
+app.get("/", (req, res) => res.send("She Rise API is running"));
 // Start the server
 // ✅ 404 Error Handling
 app.use((req, res, next) => {
